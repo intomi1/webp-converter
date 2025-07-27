@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Kép konverter JPG-re</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f0f0f0; }
+    input, button { font-size: 1rem; margin: 10px 0; }
+    canvas { display: none; }
+  </style>
+</head>
+<body>
+  <h1>Kép konverter JPG-re</h1>
+  <input type="file" id="fileInput" accept="image/*" />
+  <br />
+  <button id="convertBtn" disabled>Konvertálás JPG-be</button>
+  <br />
+  <a id="downloadLink" style="display:none;">Letöltés</a>
+  <br />
+  <img id="preview" alt="Előnézet" style="max-width: 300px; display:none; margin-top: 20px;" />
+  
+  <canvas id="canvas"></canvas>
+
+  <script>
+    const fileInput = document.getElementById('fileInput');
+    const convertBtn = document.getElementById('convertBtn');
+    const downloadLink = document.getElementById('downloadLink');
+    const preview = document.getElementById('preview');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    let img = new Image();
+
+    fileInput.addEventListener('change', () => {
+      const file = fileInput.files[0];
+      if (!file) {
+        convertBtn.disabled = true;
+        preview.style.display = 'none';
+        downloadLink.style.display = 'none';
+        return;
+      }
+      const url = URL.createObjectURL(file);
+      img.src = url;
+      img.onload = () => {
+        preview.src = url;
+        preview.style.display = 'block';
+        convertBtn.disabled = false;
+        URL.revokeObjectURL(url);
+      };
+    });
+
+    convertBtn.addEventListener('click', () => {
+      canvas.width = img.width;
+      canvas.height = img.height;
+      ctx.drawImage(img, 0, 0);
+      canvas.toBlob((blob) => {
+        const jpgUrl = URL.createObjectURL(blob);
+        downloadLink.href = jpgUrl;
+        downloadLink.download = 'converted.jpg';
+        downloadLink.textContent = 'Kép letöltése (JPG)';
+        downloadLink.style.display = 'inline-block';
+      }, 'image/jpeg', 0.92);
+    });
+  </script>
+</body>
+</html>
